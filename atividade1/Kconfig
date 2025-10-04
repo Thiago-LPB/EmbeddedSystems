@@ -1,0 +1,10 @@
+menu "Zephyr"
+source "Kconfig.zephyr"
+endmenu
+
+menu "Timers"
+config TIMER_MS
+    int "Timer duration in millisecs"
+    default 1000
+endmenu
+
