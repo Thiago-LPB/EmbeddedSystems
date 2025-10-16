@@ -1,71 +1,51 @@
 # Atividades de Sistemas Embarcados
 
-Este repositório contém exemplos e exercícios práticos para o curso de sistemas embarcados, utilizando Zephyr RTOS. As atividades abordam conceitos fundamentais como GPIO, PWM, timers e uso do sistema de logs.
+## Atividade 3
 
----
+Comunicação entre Threads com Produtores, Filtro Intermediário e Consumidor
 
-## Atividade 1 – Hello World com Timer
+Contexto:
 
-### Objetivos
+Em uma estufa inteligente, dois sensores capturam informações ambientais:
 
-- Implementar um Hello World periódico utilizando a API de timer do Zephyr.
-- Utilizar diferentes níveis de log para exibir a mensagem.
-- Configurar, via Kconfig, o intervalo de repetição da mensagem.
+    Produtor 1: Sensor de Temperatura
+    Produtor 2: Sensor de Umidade
 
-### Etapas
 
-1. **Configuração inicial**
-   - Crie um projeto Zephyr básico.
-   - Habilite o módulo de log no arquivo `prj.conf`.
-   - Defina uma opção no `Kconfig` para configurar o intervalo do timer.
+Os dados de ambos os sensores são enviados para uma fila de entrada.
 
-2. **Implementação do timer**
-   - Implemente um timer periódico usando a API de timers do Zephyr.
-   - No callback do timer, imprima a mensagem “Hello World”.
-   - O intervalo do timer deve ser configurável via Kconfig.
+Uma thread de Filtro lê da fila de entrada, aplica as regras de validação e então envia os dados para outra fila de saída, que será consumida por uma thread Consumidora.
 
-3. **Uso dos níveis de log**
-   - Utilize diferentes níveis de log (`LOG_INF`, `LOG_DBG`, `LOG_ERR`) para exibir a mensagem.
-   - Teste a alteração do nível de log no `prj.conf` e observe o comportamento.
+Fluxo:
 
----
+Produtores (Temperatura e Umidade)
 
-## Atividade 2 – Controle de Brilho de LED com GPIO, PWM e Botão
+    Capturam os dados dos sensores.
+    Enviam para a fila de entrada (msg_queue).
+    Filtro (thread intermediária)
+    Lê dados da fila de entrada.
+    Aplica regras de validação.
+    Encaminha dados válidos para a fila de saída.
+    Encaminha dados inválidos para um canal separado de log/erro.
 
-### Objetivos
 
-- Compreender o uso de GPIO como entrada e saída.
-- Aplicar PWM para controlar o brilho de um LED.
-- Implementar interação entre botão e LED.
+Consumidor
 
-### Etapas
+    Lê dados apenas da fila de saída.
+    Armazena ou exibe os dados finais considerados corretos.
 
-1. **Configuração simples**
-   - Configure um pino GPIO como saída.
-   - Escreva um código para ligar e desligar o LED.
-   - Ajuste o tempo de piscar do LED.
 
-2. **Controle do LED com botão**
-   - Configure outro pino GPIO como entrada para o botão.
-   - Altere o comportamento do LED quando o botão for pressionado.
+Regras do Filtro:
 
-3. **Controle do brilho via PWM**
-   - Configure um pino com função PWM.
-   - Implemente a variação do duty cycle para modificar o brilho do LED.
-   - Crie um efeito de transição de brilho (fade in/fade out).
+    Temperatura: só aceita valores entre 18 °C e 30 °C.
+    Umidade: só aceita valores entre 40% e 70%.
+    Fora desses intervalos → encaminhar como inconsistentes para log.
 
-4. **Integração botão + PWM**
-   - Defina dois modos de operação:
-     - **Modo 1:** LED acende/apaga normalmente (digital).
-     - **Modo 2:** LED apresenta variação gradual de brilho (PWM).
-   - Use o botão para alternar entre os modos.
 
----
+Critérios de Avaliação:
 
-## Observações
-
-- Utilize o Zephyr RTOS e consulte a documentação oficial para detalhes sobre APIs de GPIO, PWM, timers e logs.
-- Os parâmetros de configuração devem ser definidos nos arquivos `prj.conf` e `Kconfig` do projeto.
-- Teste as funcionalidades em hardware compatível ou emuladores suportados pelo Zephyr.
-
----
+    Precisa estar compilando.
+    Separação clara das responsabilidades (produção, filtragem e consumo).
+    Comunicação entre threads usando duas filas (msg_queue).
+    Implementação correta da lógica de validação na thread intermediária.
+    Organização do fluxo de dados válidos e inválidos
