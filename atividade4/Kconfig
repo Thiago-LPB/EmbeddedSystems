@@ -1,0 +1,24 @@
+menu "Zephyr"
+source "Kconfig.zephyr"
+endmenu
+
+menu "SNTP Configuration"
+
+config SNTP_SERVER
+    string "SNTP Server Address"
+    default "pool.ntp.org"
+    help
+      Endereço do servidor SNTP para sincronização de horário.
+      Exemplos: pool.ntp.org, time.google.com, a.st1.ntp.br
+      (Usado para simulação e documentação)
+
+config SNTP_SYNC_INTERVAL
+    int "SNTP Sync Interval (seconds)"
+    default 10
+    range 5 3600
+    help
+      Intervalo em segundos entre sincronizações.
+      Mínimo: 5 segundos, Máximo: 3600 segundos (1 hora)
+      Na versão simulada, controla o intervalo entre publicações.
+
+endmenu
